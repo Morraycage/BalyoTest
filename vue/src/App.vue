@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <notifications group="notification"></notifications>
     <div class="container">
       <div class="row justify-content-center mb-5">
         <DatePicker @value="getDate"></DatePicker>
@@ -8,6 +9,7 @@
         <div class="col-6">
           <div class="row">
             <div class="col-12">
+              <Loader v-if="loading"></Loader>
               <ChartContainer
                 :data="chartData"
                 :loaded="loaded"
@@ -15,6 +17,7 @@
             </div>
           </div>
         </div>
+        <Loader v-if="loading"></Loader>
         <ProductContainer :date="date"></ProductContainer>
       </div>
     </div>
@@ -26,17 +29,20 @@ import DatePicker from "./components/DatePicker";
 import ChartContainer from "./components/Chart/ChartContainer";
 import ProductContainer from "./components/ProductContainer";
 import { mapGetters } from "vuex";
+import Loader from "./components/Loader";
 
 export default {
   name: "App",
   components: {
+    Loader,
     ProductContainer,
     ChartContainer,
     DatePicker,
   },
   data() {
     return {
-      loading: true,
+      counter: 0,
+      loading: false,
       loaded: false,
       date: null,
       chartData: {
@@ -54,26 +60,13 @@ export default {
     };
   },
   methods: {
-    async getDate(date) {
+    getDate(date) {
       this.$store.commit("RESET_PRODUCTS");
       this.$store.commit("RESET_TOPICS");
 
-      this.loading = true;
       this.date = date;
 
-      this.$store
-        .dispatch("getProductFromApi", date)
-        .catch((err) => {
-          console.error(err);
-          this.loading = false;
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-
-      setTimeout(() => {
-        this.formatDataForPie()
-      }, 1000);
+      this.$store.dispatch("getProductFromApi", date)
     },
     colorRandom() {
       return `#${Math.floor(
@@ -84,8 +77,8 @@ export default {
       let newTopics = new Map();
       this.loaded = false;
 
-      this.topics.map((topicName) => {
-        this.topics.push(topicName);
+      this.topics?.map((topicName) => {
+        this.topics?.push(topicName);
         newTopics.set(topicName, (newTopics.get(topicName) ?? 0) + 1);
       });
 
@@ -94,7 +87,7 @@ export default {
         datasets: [
           {
             label: "Data One",
-            backgroundColor: this.topics.map(this.colorRandom),
+            backgroundColor: this.topics?.map(this.colorRandom),
             data: [...newTopics.values()],
           },
         ],
@@ -103,8 +96,20 @@ export default {
       this.loaded = true;
     },
   },
+  watch: {
+    topics() {
+      this.formatDataForPie()
+    }
+  },
   computed: {
-    ...mapGetters(["topics"])
+    ...mapGetters(["topics"]),
+  },
+  mounted() {
+    this.$notify({
+      group: "notification",
+      title: "Welcome message",
+      text: "Welcome to Display Product Hunt Products",
+    });
   },
 };
 </script>

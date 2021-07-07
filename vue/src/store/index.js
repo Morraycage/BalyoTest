@@ -77,8 +77,10 @@ const store = new Vuex.Store({
               ? (state.cursor = "")
               : (state.cursor = response.data.edges[response.data.edges.length - 1].cursor);
           }
+
+          return response
         })
-        .catch((err) => console.warn(err));
+        .catch((err) => console.log(err));
     },
   },
 });
