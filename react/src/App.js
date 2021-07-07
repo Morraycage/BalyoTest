@@ -12,7 +12,7 @@ function useFetchProduct(date, cursor) {
     useEffect(() => {
         if (date !== '' && cursor !== undefined) {
             (async () => {
-                const res = await fetch(`http://api/productByDay?date=${date}&cursor=${cursor}`, {
+                const res = await fetch(`http://localhost:8008/productByDay?date=${date}&cursor=${cursor}`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${apiKey}`
